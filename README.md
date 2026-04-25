@@ -77,9 +77,10 @@ You'll need **Node 20+**, **Docker**, the **Supabase CLI**, a **Supabase project
 ```bash
 git clone https://github.com/jay-sahnan/signal.git
 cd signal
-npm install
-npm run setup        # interactive: prompts for required keys, runs migrations
-npm run dev          # http://localhost:3000
+corepack enable      # activates the pinned pnpm version
+pnpm install
+pnpm setup           # interactive: prompts for required keys, runs migrations
+pnpm dev             # http://localhost:3000
 ```
 
 Prefer to configure by hand? Follow [`docs/setup.md`](./docs/setup.md).

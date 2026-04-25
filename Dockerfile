@@ -11,8 +11,9 @@ FROM node:${NODE_VERSION} AS deps
 WORKDIR /app
 # libc6-compat is occasionally needed by Next / sharp on Alpine.
 RUN apk add --no-cache libc6-compat
-COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+RUN corepack enable
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # ----------------------------------------------------------------------------
 # build — compile Next.js in standalone mode
@@ -20,6 +21,7 @@ RUN npm ci --no-audit --no-fund
 FROM node:${NODE_VERSION} AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Next inlines NEXT_PUBLIC_* at build time. Pass them as build args if you
@@ -30,7 +32,7 @@ ARG NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
-RUN npm run build
+RUN pnpm build
 
 # ----------------------------------------------------------------------------
 # runner — minimal runtime image

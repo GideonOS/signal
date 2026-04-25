@@ -52,8 +52,8 @@ next-env.d.ts
 .claude/
 .mcp.json
 
-# alternative lockfile (using npm)
-pnpm-lock.yaml
+# alternative lockfiles (canonical is pnpm)
+package-lock.json
 yarn.lock
 
 # test / e2e outputs

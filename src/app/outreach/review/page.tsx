@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Clock, Loader2, RefreshCw, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -90,6 +97,20 @@ function initialEdit(draft: DraftForReview): EditState {
 }
 
 export default function ReviewPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-1 items-center justify-center">
+          <p className="text-muted-foreground text-sm">Loading drafts...</p>
+        </div>
+      }
+    >
+      <ReviewPageInner />
+    </Suspense>
+  );
+}
+
+function ReviewPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sequenceId = searchParams.get("sequence");

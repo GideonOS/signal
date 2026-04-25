@@ -82,11 +82,13 @@ function preflight() {
     log.ok(`Node ${process.versions.node}`);
   }
 
-  if (!has("npm")) {
-    log.fail("npm not found.");
+  if (!has("pnpm")) {
+    log.fail(
+      "pnpm not found. Run `corepack enable` (Node 20+ ships with corepack) and re-run this script.",
+    );
     failed = true;
   } else {
-    log.ok("npm available");
+    log.ok("pnpm available");
   }
 
   if (!has("docker")) {
@@ -240,7 +242,7 @@ function installDeps() {
     log.ok("node_modules already present — skipping install.");
     return;
   }
-  run("npm", ["install"]);
+  run("pnpm", ["install"]);
   log.ok("Dependencies installed.");
 }
 
@@ -333,9 +335,9 @@ function summary() {
   log.header("Done");
   log.plain("Next:");
   log.plain(
-    `  ${colors.bold}npm run dev${colors.reset}   # http://localhost:3000 → sign up to create the first account`,
+    `  ${colors.bold}pnpm dev${colors.reset}   # http://localhost:3000 → sign up to create the first account`,
   );
-  log.plain(`  ${colors.bold}npm test${colors.reset}      # unit tests`);
+  log.plain(`  ${colors.bold}pnpm test${colors.reset}  # unit tests`);
   log.plain("");
   log.info(
     "Local Supabase skips email confirmation — signup is instant. See docs/setup.md if anything above didn't work.",

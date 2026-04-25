@@ -10,9 +10,9 @@
 
 <!-- Commands run, manual steps, screenshots of the result. Delete what doesn't apply. -->
 
-- [ ] `npm run lint`
-- [ ] `npm run typecheck`
-- [ ] `npm run test`
+- [ ] `pnpm lint`
+- [ ] `pnpm typecheck`
+- [ ] `pnpm test`
 - [ ] Manually exercised the changed code path in dev
 
 ## Screenshots / recordings

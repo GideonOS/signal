@@ -1,18 +1,18 @@
 # Setup
 
-The fastest path is `npm run setup` — an interactive script that prompts for keys, starts local Supabase, and runs migrations. If you don't have a hosted Supabase project, just skip those prompts: after `supabase start`, the script auto-writes the local URL + keys into `.env.local`. You'll sign up for the first account once on first run; local Supabase has email confirmation disabled, so signup is instant.
+The fastest path is `pnpm setup` — an interactive script that prompts for keys, starts local Supabase, and runs migrations. If you don't have a hosted Supabase project, just skip those prompts: after `supabase start`, the script auto-writes the local URL + keys into `.env.local`. You'll sign up for the first account once on first run; local Supabase has email confirmation disabled, so signup is instant.
 
 This doc is the manual walkthrough for when the script doesn't fit your setup, or you want to understand each step.
 
 ## Prerequisites
 
-| Tool         | Version   | Why                                     |
-| ------------ | --------- | --------------------------------------- |
-| Node         | 20+       | Runtime                                 |
-| npm          | (bundled) | Package manager                         |
-| Docker       | 24+       | For local Supabase                      |
-| Supabase CLI | 2.30+     | Applies migrations, runs local Supabase |
-| Git          | 2.30+     | —                                       |
+| Tool         | Version | Why                                                               |
+| ------------ | ------- | ----------------------------------------------------------------- |
+| Node         | 20+     | Runtime                                                           |
+| pnpm         | 10.x    | Package manager (run `corepack enable` to get the pinned version) |
+| Docker       | 24+     | For local Supabase                                                |
+| Supabase CLI | 2.30+   | Applies migrations, runs local Supabase                           |
+| Git          | 2.30+   | —                                                                 |
 
 Install the Supabase CLI:
 
@@ -28,7 +28,8 @@ brew install supabase/tap/supabase
 ```bash
 git clone https://github.com/jay-sahnan/signal.git
 cd signal
-npm install
+corepack enable
+pnpm install
 ```
 
 ## 2. Create env file
@@ -84,7 +85,7 @@ Get a key at [console.anthropic.com](https://console.anthropic.com) and paste in
 ANTHROPIC_API_KEY=sk-ant-api03-...
 ```
 
-At this point, you have enough to run `npm run dev` and see the app boot.
+At this point, you have enough to run `pnpm dev` and see the app boot.
 
 ## 5. Optional services
 
@@ -105,7 +106,7 @@ Signup links live in `.env.example` next to each block.
 ## 6. Run
 
 ```bash
-npm run dev
+pnpm dev
 # → http://localhost:3000
 ```
 
@@ -114,10 +115,10 @@ On first run, visit http://localhost:3000 and you'll be redirected to `/login`. 
 ## 7. Running tests
 
 ```bash
-npm run lint          # ESLint
-npm run typecheck     # tsc --noEmit
-npm run test          # Vitest unit tests
-npm run test:e2e      # Playwright E2E (requires a running dev server + real DB)
+pnpm lint          # ESLint
+pnpm typecheck     # tsc --noEmit
+pnpm test          # Vitest unit tests
+pnpm test:e2e      # Playwright E2E (requires a running dev server + real DB)
 ```
 
 E2E tests hit a real Supabase instance and share DB state — run them serially against a non-production project. They require `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` for fixture setup/teardown.

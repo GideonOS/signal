@@ -7,9 +7,10 @@ Thanks for wanting to help. This is a short guide — read it before opening a P
 See [`docs/setup.md`](../docs/setup.md) for the full local-dev walkthrough (~10 minutes with a Supabase + Anthropic account ready). The short version:
 
 ```bash
-npm install
-npm run setup     # interactive: prompts for keys, runs DB migrations
-npm run dev
+corepack enable   # activates the pinned pnpm version
+pnpm install
+pnpm setup        # interactive: prompts for keys, runs DB migrations
+pnpm dev
 ```
 
 ## Good first issues
@@ -22,7 +23,7 @@ Assignment is first-quality-PR-wins: if you open a PR that cleanly resolves an i
 
 1. Fork, create a feature branch off `main`.
 2. For anything bigger than ~20 lines, open an issue first so we can align on direction before you write code.
-3. Run `npm run lint && npm run typecheck && npm run test` locally — CI will check the same.
+3. Run `pnpm lint && pnpm typecheck && pnpm test` locally — CI will check the same.
 4. Open the PR against `main`. Fill in the template (what / why / how you tested).
 5. Expect review within a few business days.
 
@@ -39,7 +40,7 @@ Allowed and welcome — we build Signal with Claude and other AI tools ourselves
 ## Code style
 
 - TypeScript strict mode.
-- Prettier + ESLint run via `lint-staged` on pre-commit (Husky installs the hook on `npm install`).
+- Prettier + ESLint run via `lint-staged` on pre-commit (Husky installs the hook on `pnpm install`).
 - Follow the patterns already in the codebase; don't mix styles within a file.
 
 ## License
