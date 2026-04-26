@@ -128,7 +128,9 @@ export async function findEmailForPerson(personId: string): Promise<{
       const emails = result.text.match(EMAIL_REGEX) ?? [];
       for (const candidate of emails) {
         const lower = candidate.toLowerCase();
-        if (lower.includes("example.com")) continue;
+        const atIndex = lower.lastIndexOf("@");
+        const candidateDomain = atIndex >= 0 ? lower.slice(atIndex + 1) : "";
+        if (candidateDomain === "example.com") continue;
         const local = lower.split("@")[0];
         if (isRolePrefix(local)) continue;
         if (!emailMatchesName(lower, first, last)) continue;
