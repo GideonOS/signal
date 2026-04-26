@@ -20,6 +20,7 @@ import {
   filterContactsByCompany,
   type CandidateContact,
 } from "@/lib/services/contact-filter";
+import { recordVerifiedEmail } from "@/lib/services/email-pattern";
 
 export const searchPeople = tool({
   description:
@@ -1266,6 +1267,14 @@ export const findContacts = tool({
             organization_id: orgId,
             source: "website",
           });
+
+          if (dp.email) {
+            await recordVerifiedEmail(supabase, {
+              personId: person.id,
+              email: dp.email,
+              source: "team_page",
+            });
+          }
 
           if (input.campaignId) {
             await linkPersonToCampaign(person.id, input.campaignId);

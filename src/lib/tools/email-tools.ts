@@ -5,12 +5,32 @@ import { ExaService } from "@/lib/services/exa-service";
 import { sendMessage } from "@/lib/services/agentmail-service";
 import { trackUsage } from "@/lib/services/cost-tracker";
 import { saveDraft } from "@/lib/email-composition/save";
+import {
+  applyPattern,
+  emailMatchesName,
+  getOrgPattern,
+  inferPattern,
+  isRolePrefix,
+  mxCheck,
+  recomputeOrgPattern,
+  recordVerifiedEmail,
+  splitName,
+  SOURCE_WEIGHT,
+  type VerifiedEmail,
+} from "@/lib/services/email-pattern";
 
 // ── Shared findEmail logic ─────────────────────────────────────────────────
+
+const PATTERN_CONFIDENCE_THRESHOLD = 0.5;
+// Cap for pattern-derived confidence. Stays strictly below the UI's
+// "verified" threshold (0.9) so a pattern guess can never display as verified.
+const PATTERN_DERIVED_CONFIDENCE_FACTOR = 0.85;
+const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
 export async function findEmailForPerson(personId: string): Promise<{
   email: string | null;
   source?: string;
+  confidence?: number;
   reason?: string;
   personId: string;
 }> {
@@ -18,7 +38,9 @@ export async function findEmailForPerson(personId: string): Promise<{
 
   const { data: person, error: personErr } = await supabase
     .from("people")
-    .select("id, name, title, work_email, personal_email, organization_id")
+    .select(
+      "id, name, title, work_email, personal_email, organization_id, work_email_source, work_email_confidence",
+    )
     .eq("id", personId)
     .single();
 
@@ -27,7 +49,12 @@ export async function findEmailForPerson(personId: string): Promise<{
   }
 
   if (person.work_email) {
-    return { email: person.work_email, source: "existing", personId };
+    return {
+      email: person.work_email,
+      source: person.work_email_source ?? "existing",
+      confidence: person.work_email_confidence ?? undefined,
+      personId,
+    };
   }
   if (person.personal_email) {
     return { email: person.personal_email, source: "existing", personId };
@@ -43,11 +70,51 @@ export async function findEmailForPerson(personId: string): Promise<{
     domain = org?.domain ?? null;
   }
 
+  const { first, last } = splitName(person.name);
+
+  // ── 1) Pattern-first: if the org has a confident pattern, derive + MX-check.
+  if (domain && person.organization_id && first) {
+    const orgPattern = await getOrgPattern(supabase, person.organization_id);
+    if (
+      orgPattern?.pattern &&
+      orgPattern.confidence >= PATTERN_CONFIDENCE_THRESHOLD
+    ) {
+      const derived = applyPattern(orgPattern.pattern, first, last, domain);
+      if (
+        derived &&
+        !isRolePrefix(derived.split("@")[0]) &&
+        emailMatchesName(derived, first, last)
+      ) {
+        const mxOk = await mxCheck(domain);
+        if (mxOk) {
+          const confidence =
+            orgPattern.confidence * PATTERN_DERIVED_CONFIDENCE_FACTOR;
+          await supabase
+            .from("people")
+            .update({
+              work_email: derived,
+              work_email_source: "pattern_derived",
+              work_email_confidence: confidence,
+            })
+            .eq("id", personId);
+          return {
+            email: derived,
+            source: "pattern_derived",
+            confidence,
+            personId,
+          };
+        }
+      }
+    }
+  }
+
+  // ── 2) Exa search — kept as the discovery path when pattern is missing/weak.
   const searchQuery = domain
     ? `"${person.name}" "${domain}" email`
     : `"${person.name}" email contact`;
 
   let foundEmail: string | null = null;
+  let foundDomainMatched = false;
 
   try {
     const exa = new ExaService();
@@ -56,31 +123,25 @@ export async function findEmailForPerson(personId: string): Promise<{
       includeText: true,
     });
 
-    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
     for (const result of results.results) {
       if (!result.text) continue;
-      const emails = result.text.match(emailRegex) ?? [];
-      for (const email of emails) {
-        const lower = email.toLowerCase();
-        if (
-          lower.includes("noreply") ||
-          lower.includes("info@") ||
-          lower.includes("support@") ||
-          lower.includes("hello@") ||
-          lower.includes("contact@") ||
-          lower.includes("example.com")
-        ) {
-          continue;
-        }
+      const emails = result.text.match(EMAIL_REGEX) ?? [];
+      for (const candidate of emails) {
+        const lower = candidate.toLowerCase();
+        const atIndex = lower.lastIndexOf("@");
+        const candidateDomain = atIndex >= 0 ? lower.slice(atIndex + 1) : "";
+        if (candidateDomain === "example.com") continue;
+        const local = lower.split("@")[0];
+        if (isRolePrefix(local)) continue;
+        if (!emailMatchesName(lower, first, last)) continue;
         if (domain && lower.endsWith(`@${domain}`)) {
           foundEmail = lower;
+          foundDomainMatched = true;
           break;
         }
-        if (!foundEmail) {
-          foundEmail = lower;
-        }
+        if (!foundEmail) foundEmail = lower;
       }
-      if (foundEmail && domain && foundEmail.endsWith(`@${domain}`)) break;
+      if (foundEmail && foundDomainMatched) break;
     }
 
     trackUsage({
@@ -90,15 +151,94 @@ export async function findEmailForPerson(personId: string): Promise<{
       metadata: { personId, query: searchQuery },
     });
   } catch {
-    // Exa search failed, fall through to pattern guessing
+    // Exa search failed, fall through to on-the-fly pattern inference.
   }
 
-  if (!foundEmail && domain && person.name) {
-    const nameParts = person.name.toLowerCase().split(/\s+/);
-    if (nameParts.length >= 2) {
-      const first = nameParts[0];
-      const last = nameParts[nameParts.length - 1];
-      foundEmail = `${first}.${last}@${domain}`;
+  // ── 3) On-the-fly inference: if Exa whiffed, try inferring the pattern from
+  //       any verified emails on the org RIGHT NOW (covers the case where the
+  //       org has verified emails but the cached pattern hasn't been recomputed
+  //       or sits below the confidence threshold).
+  if (!foundEmail && domain && person.organization_id && first && last) {
+    const { data: orgPeople } = await supabase
+      .from("people")
+      .select("name, work_email, work_email_source, work_email_verified_at")
+      .eq("organization_id", person.organization_id)
+      .not("work_email", "is", null)
+      .not("work_email_verified_at", "is", null);
+
+    const evidence: VerifiedEmail[] = [];
+    for (const p of orgPeople ?? []) {
+      if (!p.work_email || !p.work_email_source) continue;
+      if (p.work_email_source === "pattern_derived") continue;
+      const split = splitName(p.name);
+      if (!split.first || !split.last) continue;
+      evidence.push({
+        email: p.work_email,
+        firstName: split.first,
+        lastName: split.last,
+        source: p.work_email_source,
+      });
+    }
+
+    if (evidence.length > 0) {
+      const inferred = inferPattern(evidence);
+      if (inferred.pattern) {
+        const derived = applyPattern(inferred.pattern, first, last, domain);
+        if (
+          derived &&
+          !isRolePrefix(derived.split("@")[0]) &&
+          emailMatchesName(derived, first, last) &&
+          (await mxCheck(domain))
+        ) {
+          const confidence =
+            inferred.confidence * PATTERN_DERIVED_CONFIDENCE_FACTOR;
+          await supabase
+            .from("people")
+            .update({
+              work_email: derived,
+              work_email_source: "pattern_derived",
+              work_email_confidence: confidence,
+            })
+            .eq("id", personId);
+          // Refresh the org's cached pattern so subsequent lookups in a bulk
+          // run hit step 1 instead of re-doing this query + Exa search.
+          await recomputeOrgPattern(supabase, person.organization_id);
+          return {
+            email: derived,
+            source: "pattern_derived",
+            confidence,
+            personId,
+          };
+        }
+      }
+    }
+  }
+
+  // ── 4) Final fallback: blind {first}.{last}@domain when nothing else worked.
+  // Goes through applyPattern (not raw interpolation) so the alphanumeric
+  // stripping + edge-case handling matches the rest of the file.
+  if (!foundEmail && domain && first && last) {
+    const blind = applyPattern("{first}.{last}", first, last, domain);
+    if (
+      blind &&
+      !isRolePrefix(blind.split("@")[0]) &&
+      emailMatchesName(blind, first, last) &&
+      (await mxCheck(domain))
+    ) {
+      await supabase
+        .from("people")
+        .update({
+          work_email: blind,
+          work_email_source: "pattern_derived",
+          work_email_confidence: 0.2,
+        })
+        .eq("id", personId);
+      return {
+        email: blind,
+        source: "pattern_derived",
+        confidence: 0.2,
+        personId,
+      };
     }
   }
 
@@ -110,12 +250,18 @@ export async function findEmailForPerson(personId: string): Promise<{
     };
   }
 
-  await supabase
-    .from("people")
-    .update({ work_email: foundEmail })
-    .eq("id", personId);
-
-  return { email: foundEmail, source: "exa_search_or_pattern", personId };
+  // Exa hit — record as verified-source with the right weight.
+  await recordVerifiedEmail(supabase, {
+    personId,
+    email: foundEmail,
+    source: "exa_search",
+  });
+  return {
+    email: foundEmail,
+    source: "exa_search",
+    confidence: SOURCE_WEIGHT.exa_search,
+    personId,
+  };
 }
 
 // ── findEmail ──────────────────────────────────────────────────────────────

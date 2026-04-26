@@ -1,7 +1,13 @@
 "use client";
 
 import { Fragment, useState } from "react";
-import { ChevronRight, ExternalLink, Loader2, Sparkles } from "lucide-react";
+import {
+  ChevronRight,
+  ExternalLink,
+  Loader2,
+  Mail,
+  Sparkles,
+} from "lucide-react";
 
 import { ContactDetail } from "@/components/campaign/contact-detail";
 import {
@@ -21,6 +27,33 @@ export function ContactsTable({
 }: ContactsTableProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [enrichingIds, setEnrichingIds] = useState<Set<string>>(new Set());
+  const [findingEmailIds, setFindingEmailIds] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const findEmail = async (contact: CampaignContact) => {
+    setFindingEmailIds((prev) => new Set(prev).add(contact.id));
+    try {
+      const res = await fetch("/api/find-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ personId: contact.person_id }),
+      });
+      const result = await res.json();
+      if (result.email) {
+        // Trigger parent re-fetch so the row picks up the new email.
+        onContactEnriched(contact.id, {} as CampaignContact);
+      }
+    } catch (err) {
+      console.error(`[find-email] Failed:`, err);
+    } finally {
+      setFindingEmailIds((prev) => {
+        const next = new Set(prev);
+        next.delete(contact.id);
+        return next;
+      });
+    }
+  };
 
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
@@ -167,6 +200,20 @@ export function ContactsTable({
                           </button>
                         )}
                       {enrichingIds.has(contact.id) && (
+                        <Loader2 className="text-muted-foreground h-3.5 w-3.5 animate-spin" />
+                      )}
+                      {!contact.work_email &&
+                        !findingEmailIds.has(contact.id) && (
+                          <button
+                            onClick={() => findEmail(contact)}
+                            className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-md p-1 transition-colors"
+                            title="Find email"
+                            aria-label={`Find email for ${contact.name}`}
+                          >
+                            <Mail className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      {findingEmailIds.has(contact.id) && (
                         <Loader2 className="text-muted-foreground h-3.5 w-3.5 animate-spin" />
                       )}
                     </div>

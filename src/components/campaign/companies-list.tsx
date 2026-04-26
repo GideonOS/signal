@@ -7,6 +7,7 @@ import {
   ChevronRight,
   ExternalLink,
   Loader2,
+  Mail,
   Sparkles,
   UserSearch,
 } from "lucide-react";
@@ -80,6 +81,12 @@ export function CompaniesList({
   const [findingContactsIds, setFindingContactsIds] = useState<Set<string>>(
     new Set(),
   );
+  const [findingEmailIds, setFindingEmailIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [findingEmailsCompanyIds, setFindingEmailsCompanyIds] = useState<
+    Set<string>
+  >(new Set());
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
@@ -183,6 +190,47 @@ export function CompaniesList({
     }
   };
 
+  const findEmailForContact = async (contact: CampaignContact) => {
+    setFindingEmailIds((prev) => new Set(prev).add(contact.id));
+    try {
+      await fetch("/api/find-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ personId: contact.person_id }),
+      });
+      onDataChanged();
+    } catch (err) {
+      console.error(`[find-email] Failed:`, err);
+    } finally {
+      setFindingEmailIds((prev) => {
+        const next = new Set(prev);
+        next.delete(contact.id);
+        return next;
+      });
+    }
+  };
+
+  const findEmailsForCompany = async (organizationId: string | null) => {
+    if (!organizationId) return;
+    setFindingEmailsCompanyIds((prev) => new Set(prev).add(organizationId));
+    try {
+      await fetch("/api/find-email/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ campaignId, organizationId }),
+      });
+      onDataChanged();
+    } catch (err) {
+      console.error(`[find-email/bulk] Failed:`, err);
+    } finally {
+      setFindingEmailsCompanyIds((prev) => {
+        const next = new Set(prev);
+        next.delete(organizationId);
+        return next;
+      });
+    }
+  };
+
   const isCompanyEnriched = (company: CampaignCompany) => {
     const data = company.enrichment_data;
     return data && "enrichedAt" in data;
@@ -261,16 +309,20 @@ export function CompaniesList({
               const isExpanded = expandedCompanyIds.has(company.id);
               const companyContacts =
                 contactsByOrgId.get(company.organization_id) ?? [];
-              const enrichedCount = companyContacts.filter(
-                (c) => c.enrichment_status === "enriched",
-              ).length;
-              const scoredContacts = companyContacts.filter(
-                (c) => c.priority_score != null && c.priority_score > 0,
-              );
-              const topScore =
-                scoredContacts.length > 0
-                  ? Math.max(...scoredContacts.map((c) => c.priority_score!))
-                  : null;
+              let enrichedCount = 0;
+              let missingEmailCount = 0;
+              let scoredCount = 0;
+              let topScore: number | null = null;
+              for (const c of companyContacts) {
+                if (c.enrichment_status === "enriched") enrichedCount++;
+                if (!c.work_email) missingEmailCount++;
+                if (c.priority_score != null && c.priority_score > 0) {
+                  scoredCount++;
+                  if (topScore === null || c.priority_score > topScore) {
+                    topScore = c.priority_score;
+                  }
+                }
+              }
               const favicon = company.url ? faviconUrl(company.url) : null;
               const isHighlighted = highlightedIds?.has(company.id);
 
@@ -380,6 +432,32 @@ export function CompaniesList({
                           Enriching
                         </span>
                       )}
+                      {missingEmailCount > 0 &&
+                        company.organization_id &&
+                        !findingEmailsCompanyIds.has(
+                          company.organization_id,
+                        ) && (
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            onClick={() =>
+                              findEmailsForCompany(company.organization_id)
+                            }
+                            title={`Find emails for ${missingEmailCount} contact${missingEmailCount === 1 ? "" : "s"}`}
+                          >
+                            <Mail className="h-3 w-3" />
+                            Find emails ({missingEmailCount})
+                          </Button>
+                        )}
+                      {company.organization_id &&
+                        findingEmailsCompanyIds.has(
+                          company.organization_id,
+                        ) && (
+                          <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Finding
+                          </span>
+                        )}
                       <ScoreBadge score={company.relevance_score} />
                     </div>
                   </div>
@@ -421,8 +499,10 @@ export function CompaniesList({
                           expandedContactIds={expandedContactIds}
                           highlightedIds={highlightedIds}
                           enrichingIds={enrichingIds}
+                          findingEmailIds={findingEmailIds}
                           onToggle={toggleContact}
                           onEnrich={enrichContact}
+                          onFindEmail={findEmailForContact}
                           onEmailEdit={updateContactEmail}
                           columnSpan={6}
                           showOutreach
@@ -496,9 +576,11 @@ export function CompaniesList({
           expandedContactIds={expandedContactIds}
           highlightedIds={highlightedIds}
           enrichingIds={enrichingIds}
+          findingEmailIds={findingEmailIds}
           onToggleSection={toggleCompany}
           onToggleContact={toggleContact}
           onEnrich={enrichContact}
+          onFindEmail={findEmailForContact}
           onEmailEdit={updateContactEmail}
         />
       )}
@@ -511,8 +593,10 @@ interface ContactsTableProps {
   expandedContactIds: Set<string>;
   highlightedIds?: Set<string>;
   enrichingIds: Set<string>;
+  findingEmailIds: Set<string>;
   onToggle: (id: string) => void;
   onEnrich: (id: string) => void;
+  onFindEmail: (contact: CampaignContact) => void | Promise<void>;
   onEmailEdit: (contact: CampaignContact, next: string) => Promise<void>;
   columnSpan: number;
   showOutreach: boolean;
@@ -523,8 +607,10 @@ function ContactsTable({
   expandedContactIds,
   highlightedIds,
   enrichingIds,
+  findingEmailIds,
   onToggle,
   onEnrich,
+  onFindEmail,
   onEmailEdit,
   columnSpan,
   showOutreach,
@@ -645,6 +731,21 @@ function ContactsTable({
                         </Button>
                       )}
                     {enrichingIds.has(contact.id) && (
+                      <Loader2 className="text-muted-foreground h-3.5 w-3.5 animate-spin" />
+                    )}
+                    {!contact.work_email &&
+                      !findingEmailIds.has(contact.id) && (
+                        <Button
+                          size="icon-xs"
+                          variant="ghost"
+                          aria-label={`Find email for ${contact.name}`}
+                          title="Find email"
+                          onClick={() => onFindEmail(contact)}
+                        >
+                          <Mail className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    {findingEmailIds.has(contact.id) && (
                       <Loader2 className="text-muted-foreground h-3.5 w-3.5 animate-spin" />
                     )}
                   </div>
@@ -818,9 +919,11 @@ interface UnassignedContactsProps {
   expandedContactIds: Set<string>;
   highlightedIds?: Set<string>;
   enrichingIds: Set<string>;
+  findingEmailIds: Set<string>;
   onToggleSection: (id: string) => void;
   onToggleContact: (id: string) => void;
   onEnrich: (id: string) => void;
+  onFindEmail: (contact: CampaignContact) => void | Promise<void>;
   onEmailEdit: (contact: CampaignContact, next: string) => Promise<void>;
 }
 
@@ -830,9 +933,11 @@ function UnassignedContacts({
   expandedContactIds,
   highlightedIds,
   enrichingIds,
+  findingEmailIds,
   onToggleSection,
   onToggleContact,
   onEnrich,
+  onFindEmail,
   onEmailEdit,
 }: UnassignedContactsProps) {
   const isOpen = expandedCompanyIds.has("__unassigned__");
@@ -871,8 +976,10 @@ function UnassignedContacts({
               expandedContactIds={expandedContactIds}
               highlightedIds={highlightedIds}
               enrichingIds={enrichingIds}
+              findingEmailIds={findingEmailIds}
               onToggle={onToggleContact}
               onEnrich={onEnrich}
+              onFindEmail={onFindEmail}
               onEmailEdit={onEmailEdit}
               columnSpan={5}
               showOutreach={false}

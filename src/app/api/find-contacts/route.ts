@@ -10,6 +10,7 @@ import {
   filterContactsByCompany,
   type CandidateContact,
 } from "@/lib/services/contact-filter";
+import { recordVerifiedEmail } from "@/lib/services/email-pattern";
 import { parseLinkedInTitle } from "@/lib/utils";
 
 export const maxDuration = 120;
@@ -115,6 +116,14 @@ export async function POST(request: Request) {
             organization_id: orgId,
             source: "website",
           });
+
+          if (dp.email) {
+            await recordVerifiedEmail(supabase, {
+              personId: person.id,
+              email: dp.email,
+              source: "team_page",
+            });
+          }
 
           await linkPersonToCampaign(person.id, campaignId);
           if (dp.linkedinUrl) existingUrls.add(dp.linkedinUrl);

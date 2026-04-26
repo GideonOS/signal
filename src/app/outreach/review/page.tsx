@@ -58,6 +58,7 @@ interface DraftForReview {
   person_name: string;
   person_title: string | null;
   person_work_email: string | null;
+  person_work_email_confidence: number | null;
   person_personal_email: string | null;
   person_linkedin_url: string | null;
   person_twitter_url: string | null;
@@ -72,6 +73,15 @@ interface DraftForReview {
   total_steps: number;
   delay_days: number | null;
   delay_hours: number | null;
+}
+
+function emailConfidenceLabel(
+  confidence: number | null,
+): { label: string; tone: "verified" | "ok" | "guessed" } | null {
+  if (confidence == null) return null;
+  if (confidence >= 0.9) return { label: "verified", tone: "verified" };
+  if (confidence >= 0.5) return { label: "likely", tone: "ok" };
+  return { label: "guessed", tone: "guessed" };
 }
 
 function formatDelay(days: number | null, hours: number | null): string {
@@ -147,7 +157,8 @@ function ReviewPageInner() {
           people(
             name, title, organization_id, enrichment_data,
             enrichment_status, last_enriched_at,
-            work_email, personal_email, linkedin_url, twitter_url,
+            work_email, work_email_confidence,
+            personal_email, linkedin_url, twitter_url,
             organizations(name, domain, industry)
           ),
           campaign_people(priority_score),
@@ -178,6 +189,7 @@ function ReviewPageInner() {
           enrichment_status: "pending" | "in_progress" | "enriched" | "failed";
           last_enriched_at: string | null;
           work_email: string | null;
+          work_email_confidence: number | null;
           personal_email: string | null;
           linkedin_url: string | null;
           twitter_url: string | null;
@@ -215,6 +227,7 @@ function ReviewPageInner() {
           person_name: person?.name ?? "Unknown",
           person_title: person?.title ?? null,
           person_work_email: person?.work_email ?? null,
+          person_work_email_confidence: person?.work_email_confidence ?? null,
           person_personal_email: person?.personal_email ?? null,
           person_linkedin_url: person?.linkedin_url ?? null,
           person_twitter_url: person?.twitter_url ?? null,
@@ -638,6 +651,15 @@ function ReviewPageInner() {
         .eq("id", personId);
       if (personErr) throw new Error(personErr.message);
 
+      // Promote to user_entered source + recompute the org pattern. Fire-and-
+      // forget so a slow recompute doesn't block the UI; the prior person
+      // update already persisted the email.
+      void fetch("/api/email/record-verified", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ personId, email: next }),
+      });
+
       setDrafts((prev) =>
         prev.map((d) =>
           d.person_id === personId
@@ -793,6 +815,26 @@ function ReviewPageInner() {
                   value={currentContact.to_email}
                   onSave={handleContactEmailEdit}
                 />
+                {(() => {
+                  const chip = emailConfidenceLabel(
+                    currentContact.person_work_email_confidence,
+                  );
+                  if (!chip) return null;
+                  const toneClass =
+                    chip.tone === "verified"
+                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      : chip.tone === "ok"
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
+                  return (
+                    <span
+                      className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${toneClass}`}
+                      title={`Confidence: ${(currentContact.person_work_email_confidence! * 100).toFixed(0)}%`}
+                    >
+                      {chip.label}
+                    </span>
+                  );
+                })()}
               </div>
             </div>
 
