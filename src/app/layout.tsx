@@ -14,8 +14,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Signal",
-  description: "Signal Dashboard",
+  title: "Rulebase Signal Engine",
+  description: "AI-powered targeting for QA, Complaints, and Sales Compliance",
 };
 
 export default function RootLayout({
