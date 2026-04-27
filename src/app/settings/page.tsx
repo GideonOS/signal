@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CostCenter } from "@/components/settings/cost-center";
 import { EmailSettings } from "@/components/settings/email-settings";
+import { IntegrationsPanel } from "@/components/settings/integrations-panel";
 import { SettingsSection } from "@/components/settings/settings-section";
 import { EmailSkillsAttacher } from "@/components/email-skills/email-skills-attacher";
 import { createClient } from "@/lib/supabase/client";
@@ -71,6 +72,7 @@ export default function SettingsPage() {
         <Tabs defaultValue="email" className="space-y-6">
           <TabsList>
             <TabsTrigger value="email">Email</TabsTrigger>
+            <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="preferences">Preferences</TabsTrigger>
             <TabsTrigger value="usage">Usage</TabsTrigger>
           </TabsList>
@@ -84,6 +86,15 @@ export default function SettingsPage() {
               description="Markdown rule packs applied to every email you draft, across all campaigns."
               unscopedMessage="Signing in…"
             />
+          </TabsContent>
+
+          <TabsContent value="integrations">
+            <SettingsSection
+              title="Integrations"
+              description="Status of every external service Signal can talk to. Add missing keys to .env.local and restart the dev server to unlock more features."
+            >
+              <IntegrationsPanel />
+            </SettingsSection>
           </TabsContent>
 
           <TabsContent value="preferences">
