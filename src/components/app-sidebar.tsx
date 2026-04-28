@@ -3,20 +3,17 @@
 import { SafeLink } from "@/components/safe-link";
 
 import {
+  Building2,
   Eye,
   LayoutDashboard,
-  Mail,
   MessageCircle,
   MessageSquare,
   Settings,
   Target,
-  UserCircle,
   Zap,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
-import { SidebarCampaigns } from "@/components/sidebar-campaigns";
-import { useCampaign } from "@/lib/campaign-context";
 import {
   Sidebar,
   SidebarContent,
@@ -33,17 +30,17 @@ import {
 
 const navItems = [
   {
-    title: "Overview",
+    title: "Targets",
     url: "/",
     icon: LayoutDashboard,
   },
   {
-    title: "Chat",
-    url: "/chat",
-    icon: MessageCircle,
+    title: "Companies",
+    url: "/companies",
+    icon: Building2,
   },
   {
-    title: "Campaigns",
+    title: "Playbooks",
     url: "/campaigns",
     icon: Target,
   },
@@ -58,14 +55,9 @@ const navItems = [
     icon: Eye,
   },
   {
-    title: "Outreach",
-    url: "/outreach",
-    icon: Mail,
-  },
-  {
-    title: "Profiles",
-    url: "/profile",
-    icon: UserCircle,
+    title: "Chat",
+    url: "/chat",
+    icon: MessageCircle,
   },
 ];
 
@@ -76,8 +68,6 @@ const defaultUser = {
 };
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
-  const { activeCampaignId, setActiveCampaignId } = useCampaign();
-
   return (
     <Sidebar variant="inset" collapsible="icon" {...props}>
       <SidebarHeader>
@@ -85,10 +75,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<SafeLink href="/" />}>
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <span className="text-sm font-bold">S</span>
+                <span className="text-sm font-bold">R</span>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">Signal</span>
+                <span className="truncate font-semibold">Rulebase</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -114,12 +104,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator />
-
-        <SidebarCampaigns
-          activeCampaignId={activeCampaignId}
-          onSelectCampaign={setActiveCampaignId}
-        />
+        {/* Campaign list removed — ICPs are tabs on the dashboard */}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

@@ -1,145 +1,185 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import dynamic from "next/dynamic";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Download } from "lucide-react";
 
-import { StatCards } from "@/components/dashboard/stat-cards";
-import { CampaignTable } from "@/components/dashboard/campaign-table";
+import { ICPTabs } from "@/components/dashboard/icp-tabs";
+import { TargetStats } from "@/components/dashboard/target-stats";
 import {
-  ListRowsSkeleton,
-  PageHeaderSkeleton,
+  TargetCard,
+  type TargetCompany,
+} from "@/components/dashboard/target-card";
+import { SignalActivityFeed } from "@/components/dashboard/signal-activity-feed";
+import { Button } from "@/components/ui/button";
+import {
   StatsRowSkeleton,
+  ListRowsSkeleton,
 } from "@/components/ui/skeleton-presets";
 
-const OutreachChart = dynamic(
-  () =>
-    import("@/components/dashboard/outreach-chart").then(
-      (m) => m.OutreachChart,
-    ),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="bg-muted/40 h-64 animate-pulse rounded-lg" />
-    ),
-  },
-);
-
 interface DashboardData {
-  totals: {
-    leads: number;
-    sent: number;
-    opened: number;
-    replied: number;
-    bounced: number;
+  stats: {
+    totalCompanies: number;
+    qualified: number;
+    readyToContact: number;
+    avgScore: number;
   };
-  timeSeries: Array<{
-    date: string;
-    sent: number;
-    opened: number;
-    replied: number;
-    bounced: number;
-  }>;
-  campaigns: Array<{
-    id: string;
-    name: string;
-    status: string;
-    leads: number;
-    sent: number;
-    opened: number;
-    openRate: number;
-    replied: number;
-    replyRate: number;
+  targets: TargetCompany[];
+  recentChanges: Array<{
+    companyName: string;
+    signalName: string;
+    changeDescription: string;
+    detectedAt: string;
   }>;
 }
 
 export default function DashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [range, setRange] = useState("30d");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <Suspense
+      fallback={
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-4 p-4 md:p-6">
+            <StatsRowSkeleton count={4} />
+            <ListRowsSkeleton count={3} />
+          </div>
+        </div>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
+  );
+}
 
-  const fetchData = useCallback(async (r: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/dashboard?range=${r}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      setData(json);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      console.error("[dashboard] Failed to fetch:", err);
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const activeTab = searchParams.get("icp") || "qa";
+
+  const [state, setState] = useState<{
+    data: DashboardData | null;
+    loading: boolean;
+    error: string | null;
+    key: number;
+  }>({
+    data: null,
+    loading: true,
+    error: null,
+    key: 0,
+  });
+  const { data, loading, error } = state;
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void fetchData(range);
-  }, [range, fetchData]);
+    let cancelled = false;
+    fetch(`/api/dashboard?preset=${activeTab}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((json) => {
+        if (!cancelled)
+          setState((s) => ({ ...s, data: json, loading: false, error: null }));
+      })
+      .catch((err) => {
+        if (!cancelled)
+          setState((s) => ({
+            ...s,
+            loading: false,
+            error: err instanceof Error ? err.message : "Unknown error",
+          }));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, state.key]);
 
-  const handleRangeChange = (newRange: string) => {
-    setRange(newRange);
+  const handleTabChange = (slug: string) => {
+    router.push(`/?icp=${slug}`);
   };
 
-  if (loading && !data) {
-    return (
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-6 p-4 md:p-6">
-          <PageHeaderSkeleton />
-          <StatsRowSkeleton count={4} />
-          <div className="bg-muted/40 h-64 animate-pulse rounded-lg" />
-          <ListRowsSkeleton count={3} />
-        </div>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <p className="text-muted-foreground text-sm">
-            {error
-              ? `Failed to load dashboard: ${error}`
-              : "Failed to load dashboard"}
-          </p>
-          <button
-            type="button"
-            onClick={() => fetchData(range)}
-            className="bg-foreground/10 hover:bg-foreground/15 rounded-md px-3 py-1.5 text-xs font-medium"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const handleExport = () => {
+    window.open(`/api/export-csv?preset=${activeTab}`, "_blank");
+  };
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="space-y-6 p-4 md:p-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Overview</h1>
-          <p className="text-muted-foreground text-sm">
-            Cross-campaign performance at a glance.
-          </p>
+      <div className="space-y-4 p-4 md:p-6">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Today&apos;s Targets
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Companies with evidence of the problem we solve — ranked by signal
+              strength.
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="mr-1.5 h-4 w-4" />
+            Export to Smartlead
+          </Button>
         </div>
 
-        <StatCards totals={data.totals} />
+        {/* ICP Tabs */}
+        <ICPTabs activeTab={activeTab} onTabChange={handleTabChange} />
 
-        <OutreachChart
-          timeSeries={data.timeSeries}
-          range={range}
-          onRangeChange={handleRangeChange}
-        />
+        {/* Stats */}
+        {loading && !data ? (
+          <StatsRowSkeleton count={4} />
+        ) : data ? (
+          <TargetStats stats={data.stats} />
+        ) : null}
 
-        <div>
-          <h2 className="mb-3 text-lg font-semibold">Campaigns</h2>
-          <CampaignTable campaigns={data.campaigns} />
-        </div>
+        {/* Error */}
+        {error && !loading && (
+          <div className="border-border rounded-lg border p-6 text-center">
+            <p className="text-muted-foreground text-sm">
+              Failed to load: {error}
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                setState((s) => ({
+                  ...s,
+                  loading: true,
+                  error: null,
+                  key: s.key + 1,
+                }))
+              }
+              className="bg-foreground/10 hover:bg-foreground/15 mt-2 rounded-md px-3 py-1.5 text-xs font-medium"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Target Cards */}
+        {loading && !data ? (
+          <ListRowsSkeleton count={3} />
+        ) : data && data.targets.length > 0 ? (
+          <div className="space-y-3">
+            {data.targets.map((target) => (
+              <TargetCard key={target.companyId} company={target} />
+            ))}
+          </div>
+        ) : data ? (
+          <div className="border-border rounded-lg border p-8 text-center">
+            <p className="text-muted-foreground text-sm">
+              No companies found for this ICP. Create a campaign with the{" "}
+              <span className="font-medium">
+                {activeTab === "qa"
+                  ? "QA"
+                  : activeTab === "complaints"
+                    ? "Complaints"
+                    : "Sales Compliance"}
+              </span>{" "}
+              preset and start discovering companies.
+            </p>
+          </div>
+        ) : null}
+
+        {/* Signal Activity Feed */}
+        {data && <SignalActivityFeed changes={data.recentChanges} />}
       </div>
     </div>
   );
