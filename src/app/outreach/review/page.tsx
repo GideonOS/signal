@@ -148,10 +148,11 @@ function ReviewPageInner() {
 
     const load = async () => {
       const supabase = createClient();
-      const { data: rawDrafts } = await supabase
-        .from("email_drafts")
-        .select(
-          `
+      const [draftsRes, stepsRes] = await Promise.all([
+        supabase
+          .from("email_drafts")
+          .select(
+            `
           id, to_email, subject, body_html, body_text, ai_reasoning,
           review_status, status, sequence_step_id, enrollment_id, person_id,
           people(
@@ -165,19 +166,21 @@ function ReviewPageInner() {
           sequence_enrollments(current_step),
           sequence_steps(step_number, delay_days, delay_hours)
         `,
-        )
-        .eq("sequence_id", sequenceId)
-        .eq("review_status", "pending")
-        .order("person_id")
-        .order("sequence_step_id");
+          )
+          .eq("sequence_id", sequenceId)
+          .eq("review_status", "pending")
+          .order("person_id")
+          .order("sequence_step_id"),
+        supabase
+          .from("sequence_steps")
+          .select("id")
+          .eq("sequence_id", sequenceId),
+      ]);
 
       if (!mountedRef.current) return;
 
-      const { data: steps } = await supabase
-        .from("sequence_steps")
-        .select("id")
-        .eq("sequence_id", sequenceId);
-
+      const rawDrafts = draftsRes.data;
+      const steps = stepsRes.data;
       const totalSteps = steps?.length ?? 1;
 
       const mapped: DraftForReview[] = (rawDrafts ?? []).map((d) => {

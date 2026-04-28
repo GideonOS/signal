@@ -86,16 +86,32 @@ function TrackingPageContent() {
       }
     }
 
-    // Fetch readiness tags from campaign_organizations
+    // Fetch readiness tags + latest changes in parallel — both depend on
+    // configs but are independent of each other.
     const uniqueOrgIds = [...new Set(configOrgMap.values())];
-    const { data: orgLinks } = await supabase
-      .from("campaign_organizations")
-      .select("organization_id, readiness_tag")
-      .eq("campaign_id", campaignId)
-      .in(
-        "organization_id",
-        uniqueOrgIds.length > 0 ? uniqueOrgIds : ["__none__"],
-      );
+    const configIds = configs.map(
+      (c: Record<string, unknown>) => c.id as string,
+    );
+    const [orgLinksRes, latestChangesRes] = await Promise.all([
+      supabase
+        .from("campaign_organizations")
+        .select("organization_id, readiness_tag")
+        .eq("campaign_id", campaignId)
+        .in(
+          "organization_id",
+          uniqueOrgIds.length > 0 ? uniqueOrgIds : ["__none__"],
+        ),
+      supabase
+        .from("tracking_changes")
+        .select("tracking_config_id, description, detected_at")
+        .in(
+          "tracking_config_id",
+          configIds.length > 0 ? configIds : ["__none__"],
+        )
+        .order("detected_at", { ascending: false }),
+    ]);
+    const orgLinks = orgLinksRes.data;
+    const latestChanges = latestChangesRes.data;
 
     const readinessMap = new Map<string, string>();
     for (const link of orgLinks ?? []) {
@@ -104,16 +120,6 @@ function TrackingPageContent() {
         (link.readiness_tag as string) || "",
       );
     }
-
-    // Fetch latest changes per config
-    const configIds = configs.map(
-      (c: Record<string, unknown>) => c.id as string,
-    );
-    const { data: latestChanges } = await supabase
-      .from("tracking_changes")
-      .select("tracking_config_id, description, detected_at")
-      .in("tracking_config_id", configIds.length > 0 ? configIds : ["__none__"])
-      .order("detected_at", { ascending: false });
 
     const changeMap = new Map<
       string,

@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -44,21 +45,26 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
     setAgentOpen(true);
   }, []);
 
-  return (
-    <CampaignContext
-      value={{
-        activeCampaignId,
-        setActiveCampaignId,
-        agentOpen,
-        setAgentOpen,
-        pendingPrompt,
-        consumePendingPrompt,
-        openAgentWith,
-      }}
-    >
-      {children}
-    </CampaignContext>
+  const value = useMemo<CampaignContextValue>(
+    () => ({
+      activeCampaignId,
+      setActiveCampaignId,
+      agentOpen,
+      setAgentOpen,
+      pendingPrompt,
+      consumePendingPrompt,
+      openAgentWith,
+    }),
+    [
+      activeCampaignId,
+      agentOpen,
+      pendingPrompt,
+      consumePendingPrompt,
+      openAgentWith,
+    ],
   );
+
+  return <CampaignContext value={value}>{children}</CampaignContext>;
 }
 
 export function useCampaign() {

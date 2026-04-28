@@ -1,13 +1,23 @@
 "use client";
 
 import { memo } from "react";
+import dynamic from "next/dynamic";
 
 import type { UIMessage } from "ai";
 import { isToolUIPart, getToolName } from "ai";
 import { Bot, User } from "lucide-react";
 
-import { Markdown } from "@/components/ui/markdown";
 import { ToolCallCard } from "./tool-call-card";
+
+const Markdown = dynamic(
+  () => import("@/components/ui/markdown").then((m) => m.Markdown),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-muted-foreground/10 h-4 w-32 animate-pulse rounded" />
+    ),
+  },
+);
 
 interface ChatMessageBubbleProps {
   message: UIMessage;

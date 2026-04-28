@@ -54,6 +54,7 @@ export default function OutreachPage() {
       enrollmentsRes,
       draftsRes,
       settingsRes,
+      stepRowsRes,
     ] = await Promise.all([
       supabase
         .from("sequences")
@@ -89,6 +90,7 @@ export default function OutreachPage() {
         .order("created_at", { ascending: false })
         .limit(200),
       supabase.from("user_settings").select("agentmail_inbox_id").maybeSingle(),
+      supabase.from("sequence_steps").select("sequence_id, step_number"),
     ]);
 
     if (!mountedRef.current) return;
@@ -120,9 +122,7 @@ export default function OutreachPage() {
 
     // Count total steps per sequence (for Step N/M display)
     const totalStepsBySeq = new Map<string, number>();
-    const { data: stepRows } = await supabase
-      .from("sequence_steps")
-      .select("sequence_id, step_number");
+    const stepRows = stepRowsRes.data;
     for (const s of stepRows ?? []) {
       const cur = totalStepsBySeq.get(s.sequence_id) ?? 0;
       if (s.step_number > cur)

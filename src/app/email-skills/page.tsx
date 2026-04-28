@@ -61,11 +61,9 @@ export default function EmailSkillsPage() {
 
   const fetchData = useCallback(async () => {
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
 
-    const [skillsRes, campaignsRes, profilesRes] = await Promise.all([
+    const [userRes, skillsRes, campaignsRes, profilesRes] = await Promise.all([
+      supabase.auth.getUser(),
       supabase
         .from("email_skills")
         .select("*")
@@ -82,7 +80,7 @@ export default function EmailSkillsPage() {
     ]);
 
     if (!mountedRef.current) return;
-    setUserId(user?.id ?? null);
+    setUserId(userRes.data.user?.id ?? null);
     setSkills((skillsRes.data as EmailSkill[]) ?? []);
     setCampaigns((campaignsRes.data as Campaign[]) ?? []);
     setProfiles((profilesRes.data as UserProfile[]) ?? []);
