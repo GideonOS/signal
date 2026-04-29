@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     });
   }
 
-  // Fetch scored companies with enrichment data
+  // Fetch only enriched/scored companies — skip pending ones
   const { data: companyRows } = await supabase
     .from("campaign_organizations")
     .select(
@@ -60,8 +60,9 @@ export async function GET(request: Request) {
     `,
     )
     .in("campaign_id", campaignIds)
+    .not("relevance_score", "is", null)
     .order("relevance_score", { ascending: false, nullsFirst: false })
-    .limit(50);
+    .limit(200);
 
   // Supabase !inner joins return the relation as the object directly, but TS
   // types it as an array. Cast rows to unknown first.
@@ -118,6 +119,7 @@ export async function GET(request: Request) {
         generated_email_subject,
         generated_email_body,
         person:people!inner(
+          id,
           name,
           title,
           linkedin_url,
@@ -162,13 +164,12 @@ export async function GET(request: Request) {
     const contacts = contactMap.get(orgId)!;
     if (contacts.length < 3) {
       contacts.push({
+        personId: person.id,
         name: person.name,
         title: person.title,
         linkedinUrl: person.linkedin_url,
         email: person.work_email,
         priorityScore: cr.priority_score,
-        emailSubject: cr.generated_email_subject,
-        emailBody: cr.generated_email_body,
       });
     }
   }

@@ -69,13 +69,15 @@ interface SeedCompany {
 }
 
 const SEED_COMPANIES: SeedCompany[] = [
-  // Complaints & Sales Compliance — Auto Finance
+  // ════════════════════════════════════════════════════════════════════
+  // COMPLAINTS & SALES COMPLIANCE — Auto Finance
+  // ════════════════════════════════════════════════════════════════════
   {
     name: "Westlake Financial",
     domain: "westlakefinancial.com",
     presets: ["complaints", "sales-compliance"],
     context:
-      "Independent subprime auto lender, $44M CFPB consent order history, highest-risk profile",
+      "$44M CFPB consent order history, independent subprime auto lender",
   },
   {
     name: "Credit Acceptance",
@@ -107,15 +109,13 @@ const SEED_COMPANIES: SeedCompany[] = [
     name: "Ally Financial",
     domain: "ally.com",
     presets: ["complaints", "sales-compliance"],
-    context:
-      "Major auto lender, $98M consent order history, high public complaint volume",
+    context: "$98M consent order history, major auto lender",
   },
   {
     name: "GM Financial",
     domain: "gmfinancial.com",
     presets: ["complaints", "sales-compliance"],
-    context:
-      "Captive finance, massive origination volume, regulatory spotlight",
+    context: "Captive finance, massive origination volume",
   },
   {
     name: "Toyota Motor Credit",
@@ -140,10 +140,74 @@ const SEED_COMPANIES: SeedCompany[] = [
     name: "Caribou",
     domain: "caribou.com",
     presets: ["complaints", "sales-compliance"],
-    context: "Digital auto lending, fast-growing fintech",
+    context: "Digital auto refinancing, fast-growing fintech",
+  },
+  {
+    name: "Capital One Auto",
+    domain: "capitalone.com",
+    presets: ["complaints", "sales-compliance"],
+    context:
+      "Massive auto lending portfolio, CFPB supervised, high complaint volume",
+  },
+  {
+    name: "Santander Consumer USA",
+    domain: "santanderconsumerusa.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Subprime auto lender, multiple enforcement actions, high risk",
+  },
+  {
+    name: "AmeriCredit",
+    domain: "gmfinancial.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "GM Financial subsidiary, subprime auto lending",
+  },
+  {
+    name: "Exeter Finance",
+    domain: "exeterfinance.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Subprime auto lender, PE-backed, scaling fast",
+  },
+  {
+    name: "Carvana",
+    domain: "carvana.com",
+    presets: ["complaints", "sales-compliance"],
+    context:
+      "Online auto dealer + financing, high complaint volume, recent restructuring",
+  },
+  {
+    name: "Vroom Finance",
+    domain: "vroom.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Online auto dealer, consumer complaints",
+  },
+  {
+    name: "World Omni Financial",
+    domain: "worldomni.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Auto finance subsidiary of Southeast Toyota",
+  },
+  {
+    name: "ACA (American Credit Acceptance)",
+    domain: "americancreditacceptance.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Subprime auto lender, compliance risk",
+  },
+  {
+    name: "Prestige Financial",
+    domain: "gopfs.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Deep subprime auto lender",
+  },
+  {
+    name: "United Auto Credit",
+    domain: "unitedautocredit.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Subprime auto lender, dealer network",
   },
 
-  // Complaints & Sales Compliance — Consumer Lending / Mortgage
+  // ════════════════════════════════════════════════════════════════════
+  // COMPLAINTS & SALES COMPLIANCE — Consumer Lending / Mortgage
+  // ════════════════════════════════════════════════════════════════════
   {
     name: "LendingClub",
     domain: "lendingclub.com",
@@ -199,13 +263,163 @@ const SEED_COMPANIES: SeedCompany[] = [
     context: "Mortgage servicer, high complaint volume",
   },
   {
+    name: "Prosper",
+    domain: "prosper.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "P2P lending marketplace, consumer lending",
+  },
+  {
+    name: "Upstart",
+    domain: "upstart.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "AI lending platform, high origination, fair lending scrutiny",
+  },
+  {
+    name: "Pagaya",
+    domain: "pagaya.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "AI lending infrastructure, powering bank lending decisions",
+  },
+  {
+    name: "Freedom Financial",
+    domain: "freedomfinancialnetwork.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Debt settlement, high complaint volume, regulatory risk",
+  },
+  {
+    name: "Navient",
+    domain: "navient.com",
+    presets: ["complaints"],
+    context: "Student loan servicer, multiple state AG actions",
+  },
+  {
+    name: "Nelnet",
+    domain: "nelnet.com",
+    presets: ["complaints"],
+    context: "Student loan servicer, high volume",
+  },
+  {
+    name: "OneMain Financial",
+    domain: "onemainfinancial.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Branch-based consumer lender, high volume personal loans",
+  },
+  {
+    name: "Mariner Finance",
+    domain: "marinerfinance.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Consumer finance, branch network, compliance risk",
+  },
+  {
+    name: "Regional Finance",
+    domain: "regionalfinance.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Consumer finance branches, underserved markets",
+  },
+  {
+    name: "Rocket Mortgage",
+    domain: "rocketmortgage.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Largest mortgage lender, massive call center operations",
+  },
+  {
+    name: "UWM (United Wholesale Mortgage)",
+    domain: "uwm.com",
+    presets: ["complaints", "sales-compliance"],
+    context: "Wholesale mortgage giant, broker compliance oversight",
+  },
+  {
+    name: "PennyMac",
+    domain: "pennymac.com",
+    presets: ["complaints"],
+    context: "Large mortgage servicer, growing portfolio",
+  },
+  {
+    name: "Caliber Home Loans",
+    domain: "caliberhomeloans.com",
+    presets: ["complaints"],
+    context: "Mortgage servicer, mid-market",
+  },
+  {
+    name: "Planet Home Lending",
+    domain: "planethomelending.com",
+    presets: ["complaints"],
+    context: "Mortgage lender/servicer, growing portfolio",
+  },
+
+  // ════════════════════════════════════════════════════════════════════
+  // COMPLAINTS — Credit Unions & Community Banks
+  // ════════════════════════════════════════════════════════════════════
+  {
+    name: "Navy Federal Credit Union",
+    domain: "navyfederal.org",
+    presets: ["complaints", "sales-compliance"],
+    context: "Largest CU, recent CFPB scrutiny, massive member base",
+  },
+  {
+    name: "Pentagon Federal Credit Union",
+    domain: "penfed.org",
+    presets: ["complaints"],
+    context: "Large CU, auto and personal lending",
+  },
+  {
+    name: "USAA",
+    domain: "usaa.com",
+    presets: ["complaints", "qa"],
+    context: "Large military bank, massive call center, high CX expectations",
+  },
+  {
+    name: "Suncoast Credit Union",
+    domain: "suncoastcreditunion.com",
+    presets: ["complaints"],
+    context: "Large FL credit union, growing lending",
+  },
+  {
+    name: "Golden 1 Credit Union",
+    domain: "golden1.com",
+    presets: ["complaints"],
+    context: "Large CA credit union",
+  },
+
+  // ════════════════════════════════════════════════════════════════════
+  // QA — Fintech / Neobanks (user-mentioned + expanded)
+  // ════════════════════════════════════════════════════════════════════
+  {
+    name: "Rho",
+    domain: "rho.co",
+    presets: ["qa"],
+    context: "B2B fintech, corporate banking, growing CX team",
+  },
+  {
+    name: "Qonto",
+    domain: "qonto.com",
+    presets: ["qa"],
+    context: "EU business banking, 500K+ customers, large support team",
+  },
+  {
+    name: "Kuda",
+    domain: "kuda.com",
+    presets: ["qa"],
+    context: "African neobank, millions of users, scaling CX",
+  },
+  {
+    name: "Hometap",
+    domain: "hometap.com",
+    presets: ["qa", "sales-compliance"],
+    context: "Home equity fintech, sales-led, regulated product",
+  },
+  {
+    name: "Spendesk",
+    domain: "spendesk.com",
+    presets: ["qa"],
+    context: "EU spend management, growing SMB support base",
+  },
+  {
     name: "SoFi",
     domain: "sofi.com",
     presets: ["complaints", "sales-compliance", "qa"],
     context: "Multi-product fintech, high growth, scaling CX",
   },
-
-  // QA — Fintech / SaaS with CX operations
   {
     name: "Brex",
     domain: "brex.com",
@@ -265,6 +479,263 @@ const SEED_COMPANIES: SeedCompany[] = [
     domain: "rippling.com",
     presets: ["qa"],
     context: "HR platform, fast scaling CX",
+  },
+  {
+    name: "Mercury",
+    domain: "mercury.com",
+    presets: ["qa"],
+    context: "Startup banking, growing rapidly, scaling CX",
+  },
+  {
+    name: "Deel",
+    domain: "deel.com",
+    presets: ["qa"],
+    context: "Global payroll/HR, massive international support team",
+  },
+  {
+    name: "Remote",
+    domain: "remote.com",
+    presets: ["qa"],
+    context: "Global HR platform, distributed support team",
+  },
+  {
+    name: "Wise",
+    domain: "wise.com",
+    presets: ["qa", "complaints"],
+    context: "Cross-border payments, millions of users, regulated globally",
+  },
+  {
+    name: "Revolut",
+    domain: "revolut.com",
+    presets: ["qa", "complaints"],
+    context: "Neobank, 40M+ users, massive CX volume, regulatory scrutiny",
+  },
+  {
+    name: "Monzo",
+    domain: "monzo.com",
+    presets: ["qa", "complaints"],
+    context: "UK neobank, high consumer volume, FCA regulated",
+  },
+  {
+    name: "Starling Bank",
+    domain: "starlingbank.com",
+    presets: ["qa", "complaints"],
+    context: "UK digital bank, growing rapidly",
+  },
+  {
+    name: "N26",
+    domain: "n26.com",
+    presets: ["qa", "complaints"],
+    context: "EU neobank, regulatory issues, CX scaling",
+  },
+  {
+    name: "Dave",
+    domain: "dave.com",
+    presets: ["qa", "complaints"],
+    context: "US neobank, consumer lending, CFPB supervised",
+  },
+  {
+    name: "MoneyLion",
+    domain: "moneylion.com",
+    presets: ["qa", "complaints"],
+    context: "Consumer fintech, lending + banking, high volume",
+  },
+  {
+    name: "Current",
+    domain: "current.com",
+    presets: ["qa", "complaints"],
+    context: "US neobank, consumer banking",
+  },
+  {
+    name: "Varo Bank",
+    domain: "varomoney.com",
+    presets: ["qa", "complaints"],
+    context: "Digital bank, chartered, CFPB supervised",
+  },
+  {
+    name: "Green Dot",
+    domain: "greendot.com",
+    presets: ["qa", "complaints"],
+    context: "Banking platform, prepaid cards, high consumer volume",
+  },
+  {
+    name: "Robinhood",
+    domain: "robinhood.com",
+    presets: ["qa", "complaints"],
+    context: "Trading platform, massive user base, regulatory scrutiny",
+  },
+  {
+    name: "Coinbase",
+    domain: "coinbase.com",
+    presets: ["qa", "complaints"],
+    context: "Crypto exchange, large support team, complaint volume",
+  },
+  {
+    name: "Stripe",
+    domain: "stripe.com",
+    presets: ["qa"],
+    context: "Payments infra, massive support volume, scaling CX",
+  },
+  {
+    name: "Square / Block",
+    domain: "squareup.com",
+    presets: ["qa", "complaints"],
+    context: "Payments + banking, high consumer volume",
+  },
+  {
+    name: "PayPal",
+    domain: "paypal.com",
+    presets: ["qa", "complaints"],
+    context: "Massive payment platform, high complaint volume, CFPB data",
+  },
+  {
+    name: "Adyen",
+    domain: "adyen.com",
+    presets: ["qa"],
+    context: "Enterprise payments, growing support team",
+  },
+  {
+    name: "Checkout.com",
+    domain: "checkout.com",
+    presets: ["qa"],
+    context: "Enterprise payments, scaling CX",
+  },
+  {
+    name: "GoCardless",
+    domain: "gocardless.com",
+    presets: ["qa"],
+    context: "Direct debit payments, SMB support",
+  },
+
+  // ════════════════════════════════════════════════════════════════════
+  // QA — SaaS / E-commerce with large CX operations
+  // ════════════════════════════════════════════════════════════════════
+  {
+    name: "Zendesk",
+    domain: "zendesk.com",
+    presets: ["qa"],
+    context:
+      "CX platform vendor, massive internal support team, eats own dogfood",
+  },
+  {
+    name: "Intercom",
+    domain: "intercom.com",
+    presets: ["qa"],
+    context: "CX platform, high-volume support, AI-first strategy",
+  },
+  {
+    name: "Freshworks",
+    domain: "freshworks.com",
+    presets: ["qa"],
+    context: "CX platform, large support operations",
+  },
+  {
+    name: "HubSpot",
+    domain: "hubspot.com",
+    presets: ["qa"],
+    context: "CRM/CX platform, massive SMB support base",
+  },
+  {
+    name: "Shopify",
+    domain: "shopify.com",
+    presets: ["qa"],
+    context: "E-commerce platform, millions of merchants, huge CX",
+  },
+  {
+    name: "Lemonade",
+    domain: "lemonade.com",
+    presets: ["qa", "complaints"],
+    context: "Insurtech, AI-first claims, regulated, consumer complaints",
+  },
+  {
+    name: "Root Insurance",
+    domain: "joinroot.com",
+    presets: ["qa", "complaints"],
+    context: "Insurtech, mobile-first, growing complaints",
+  },
+  {
+    name: "Hippo Insurance",
+    domain: "hippo.com",
+    presets: ["qa", "complaints"],
+    context: "Insurtech, home insurance, consumer CX",
+  },
+  {
+    name: "Wealthsimple",
+    domain: "wealthsimple.com",
+    presets: ["qa"],
+    context: "Canadian fintech, investing + banking, scaling CX",
+  },
+  {
+    name: "Betterment",
+    domain: "betterment.com",
+    presets: ["qa"],
+    context: "Robo-advisor, consumer fintech, support team",
+  },
+  {
+    name: "Pipe",
+    domain: "pipe.com",
+    presets: ["qa"],
+    context: "Revenue-based financing, B2B fintech",
+  },
+  {
+    name: "Divvy / Bill.com",
+    domain: "bill.com",
+    presets: ["qa"],
+    context: "B2B payments, large SMB support base",
+  },
+  {
+    name: "Justworks",
+    domain: "justworks.com",
+    presets: ["qa"],
+    context: "PEO/HR platform, SMB support",
+  },
+  {
+    name: "Lattice",
+    domain: "lattice.com",
+    presets: ["qa"],
+    context: "HR platform, growing CX team",
+  },
+  {
+    name: "Carta",
+    domain: "carta.com",
+    presets: ["qa"],
+    context: "Equity management, complex support needs",
+  },
+  {
+    name: "Navan (TripActions)",
+    domain: "navan.com",
+    presets: ["qa"],
+    context: "Travel/expense, 24/7 support, high volume",
+  },
+  {
+    name: "Airwallex",
+    domain: "airwallex.com",
+    presets: ["qa"],
+    context: "Cross-border payments, scaling globally",
+  },
+  {
+    name: "Tide",
+    domain: "tide.co",
+    presets: ["qa"],
+    context: "UK SMB banking, large customer base",
+  },
+  {
+    name: "OakNorth",
+    domain: "oaknorth.com",
+    presets: ["qa"],
+    context: "UK digital bank, lending focus",
+  },
+  {
+    name: "Thought Machine",
+    domain: "thoughtmachine.net",
+    presets: ["qa"],
+    context: "Core banking platform, enterprise support",
+  },
+  {
+    name: "Mambu",
+    domain: "mambu.com",
+    presets: ["qa"],
+    context: "Cloud banking platform, growing support",
   },
 ];
 
@@ -358,7 +829,6 @@ const DISCOVERY_CONFIGS: DiscoveryConfig[] = [
   {
     preset: "complaints",
     queries: [
-      // Find company websites in auto finance / consumer lending space
       {
         query: "auto finance company servicing loans consumer lending",
         daysBack: 90,
@@ -367,12 +837,22 @@ const DISCOVERY_CONFIGS: DiscoveryConfig[] = [
         query: "consumer lending company mortgage servicing collections",
         daysBack: 90,
       },
-      // Find companies mentioned in enforcement context
       {
         query:
-          "CFPB enforcement action auto finance consumer lending company 2025 2026",
+          "CFPB enforcement action auto finance consumer lending 2025 2026",
         daysBack: 60,
       },
+      { query: "subprime auto lender origination servicing", daysBack: 90 },
+      { query: "credit union auto lending consumer complaints", daysBack: 60 },
+      {
+        query: "fintech lender personal loans installment credit",
+        daysBack: 90,
+      },
+      {
+        query: "mortgage servicing company complaints rising 2025 2026",
+        daysBack: 60,
+      },
+      { query: "BHPH buy here pay here auto dealer finance", daysBack: 90 },
     ],
   },
   {
@@ -386,19 +866,50 @@ const DISCOVERY_CONFIGS: DiscoveryConfig[] = [
         query: "UDAAP fair lending auto finance enforcement 2025 2026",
         daysBack: 60,
       },
+      { query: "auto dealer finance compliance sales practice", daysBack: 90 },
+      {
+        query: "consumer lending sales monitoring disclosure compliance",
+        daysBack: 60,
+      },
+      {
+        query: "mortgage origination sales compliance monitoring",
+        daysBack: 90,
+      },
+      {
+        query: "student loan servicer sales practice compliance",
+        daysBack: 90,
+      },
     ],
   },
   {
     preset: "qa",
     queries: [
       {
-        query: "fintech company customer support team scaling AI chatbot",
+        query:
+          "fintech company customer support team scaling AI chatbot 2025 2026",
+        daysBack: 60,
+      },
+      {
+        query: "SaaS company customer experience operations quality assurance",
+        daysBack: 60,
+      },
+      { query: "neobank digital bank customer service scaling", daysBack: 60 },
+      {
+        query: "B2B fintech growing support team hiring customer experience",
         daysBack: 30,
       },
       {
-        query:
-          "SaaS company customer experience operations quality assurance contact center",
-        daysBack: 30,
+        query: "BNPL buy now pay later company customer operations",
+        daysBack: 60,
+      },
+      { query: "insurtech company customer claims support team", daysBack: 60 },
+      {
+        query: "payments company customer support scaling 2025 2026",
+        daysBack: 60,
+      },
+      {
+        query: "European fintech neobank customer experience team growth",
+        daysBack: 60,
       },
     ],
   },
@@ -492,8 +1003,8 @@ const SIGNALS: SignalDef[] = [
     scoreBoost: 5,
     presets: ["complaints", "sales-compliance"],
     query:
-      '"{company}" consent order OR enforcement action OR CFPB fine OR civil money penalty 2025 OR 2026',
-    daysBack: 180,
+      '"{company}" (consent order OR enforcement action OR CFPB fine OR civil money penalty OR recently settled OR settlement agreement) (2025 OR 2026)',
+    daysBack: 365,
     staticEvidence: [
       {
         urlTemplate:
@@ -510,7 +1021,7 @@ const SIGNALS: SignalDef[] = [
     scoreBoost: 4,
     presets: ["complaints", "sales-compliance", "qa"],
     query:
-      '"{company}" hired OR appointed OR named Chief Compliance Officer OR Head of CX OR VP Customer Experience OR VP Operations OR CCO OR General Counsel',
+      '"{company}" (hired OR appointed OR named OR joins) (Chief Compliance Officer OR Head of CX OR VP Customer Experience OR VP Operations OR CCO OR General Counsel) 2025 OR 2026',
     daysBack: 90,
     staticEvidence: [
       {
@@ -525,8 +1036,8 @@ const SIGNALS: SignalDef[] = [
     scoreBoost: 4,
     presets: ["complaints", "sales-compliance"],
     query:
-      '"{company}" CFPB complaints rising OR increasing OR surge OR volume consumer financial protection',
-    daysBack: 60,
+      '"{company}" CFPB complaints (rising OR increasing OR surge OR record) 2025 OR 2026',
+    daysBack: 90,
     staticEvidence: [
       {
         urlTemplate:
@@ -541,8 +1052,8 @@ const SIGNALS: SignalDef[] = [
     scoreBoost: 3,
     presets: ["complaints"],
     query:
-      '"{company}" Trustpilot OR BBB complaints OR terrible service OR worst experience OR scam',
-    daysBack: 30,
+      '"{company}" (Trustpilot OR BBB) (complaints OR terrible service OR worst experience OR scam OR 1 star) 2025 OR 2026',
+    daysBack: 60,
     staticEvidence: [
       {
         urlTemplate: "https://www.trustpilot.com/review/{domain}",
@@ -556,7 +1067,7 @@ const SIGNALS: SignalDef[] = [
     scoreBoost: 3,
     presets: ["complaints", "sales-compliance"],
     query:
-      '"{company}" acquired OR private equity acquisition OR new ownership OR ownership change auto finance OR lending',
+      '"{company}" (acquired OR private equity OR new ownership OR funding round OR raises) 2025 OR 2026',
     daysBack: 180,
   },
 
@@ -567,7 +1078,7 @@ const SIGNALS: SignalDef[] = [
     scoreBoost: 2,
     presets: ["complaints", "sales-compliance", "qa"],
     query:
-      '"{company}" hiring OR job OR career "complaint" OR "QA Manager" OR "Quality Analyst" OR "compliance monitoring" OR "UDAAP" OR "fair lending"',
+      '"{company}" (hiring OR job posting OR career) (complaint OR QA Manager OR Quality Analyst OR compliance monitoring OR UDAAP OR fair lending) 2025 OR 2026',
     daysBack: 30,
     staticEvidence: [
       {
@@ -582,8 +1093,8 @@ const SIGNALS: SignalDef[] = [
     scoreBoost: 2,
     presets: ["qa"],
     query:
-      '"{company}" deployed OR launched AI agent OR AI chatbot OR voice AI OR conversational AI customer service',
-    daysBack: 60,
+      '"{company}" (deployed OR launched OR rolling out) (AI agent OR AI chatbot OR voice AI OR conversational AI) customer service 2025 OR 2026',
+    daysBack: 90,
   },
   {
     name: "UDAAP / Sales Practice Risk",
@@ -591,8 +1102,8 @@ const SIGNALS: SignalDef[] = [
     scoreBoost: 2,
     presets: ["sales-compliance"],
     query:
-      '"{company}" UDAAP violation OR misleading sales OR disclosure failure OR fair lending violation OR deceptive practice',
-    daysBack: 90,
+      '"{company}" (UDAAP violation OR misleading sales OR disclosure failure OR fair lending violation OR deceptive practice) 2025 OR 2026',
+    daysBack: 180,
   },
   {
     name: "CX Team Scaling",
@@ -600,8 +1111,8 @@ const SIGNALS: SignalDef[] = [
     scoreBoost: 1,
     presets: ["qa"],
     query:
-      '"{company}" growing customer support OR expanding CX team OR hired customer experience OR scaling contact center',
-    daysBack: 30,
+      '"{company}" (growing customer support OR expanding CX team OR scaling contact center OR hiring customer experience) 2025 OR 2026',
+    daysBack: 60,
     minHits: 2,
   },
 ];
